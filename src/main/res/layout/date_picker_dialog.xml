@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/dateSetTxt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
+        android:text="NO DATE SET" />
+
+    <Button
+        android:id="@+id/dateClearBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/dateSetTxt"
+
+        android:text="CLEAR" />
+
+    <Button
+        android:id="@+id/dateSetBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/dateSetTxt"
+        android:text="SET DATE" />
+
+
+</RelativeLayout>
