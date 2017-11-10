@@ -10,6 +10,8 @@ import android.widget.DatePicker
 import android.widget.TextView
 import android.widget.TimePicker
 import java.util.*
+import android.arch.lifecycle.ViewModelProviders
+
 
 /**
  * Opens a AlertDialog where the user can set time and date.
@@ -23,28 +25,37 @@ class SimpleDateDlgFragment : DialogFragment(), DatePickerDialog.OnDateSetListen
         const val SIMPLE_DATE_RESULT_CODE = "value"
     }
 
-    private var timeMs: Long = 0
+
     private lateinit var setDateTxt: TextView
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
 
-
         val dialogView = activity.layoutInflater.inflate(R.layout.date_picker_dialog, null) as View
         dialogView.findViewById<Button>(R.id.dateSetBtn).setOnClickListener({
-                    DateFragment().show(childFragmentManager, "")
+            DateFragment().show(childFragmentManager, "")
         })
 
-        setDateTxt = dialogView.findViewById<TextView>(R.id.dateSetTxt)
+        setDateTxt = dialogView.findViewById(R.id.dateSetTxt)
+
+        val viewModel = ViewModelProviders.of(this).get(SimpleDateViewModel::class.java)
+
+        dialogView.findViewById<Button>(R.id.dateClearBtn).setOnClickListener({
+            viewModel.timeMs = null
+            setDateTxt.text = resources.getText(R.string.emptyDate)
+        })
+
+
         val returnIntent = Intent()
         return AlertDialog.Builder(activity, R.style.SimpleCalendarDlgStyle).setTitle("Pick Date").setView(dialogView).setPositiveButton("OK") { _, _ ->
 
-            returnIntent.putExtra(SIMPLE_DATE_RESULT_CODE, timeMs)
-            targetFragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, returnIntent)
+            returnIntent.putExtra(SIMPLE_DATE_RESULT_CODE, viewModel.timeMs)
+            targetFragment.onActivityResult(targetRequestCode, Activity.RESULT_OK, returnIntent)
             dialog.dismiss()
 
         }.setNegativeButton("CANCEL") { _, _ ->
-            targetFragment.onActivityResult(getTargetRequestCode(), Activity.RESULT_CANCELED, returnIntent)
+
+            targetFragment.onActivityResult(targetRequestCode, Activity.RESULT_CANCELED, returnIntent)
             dialog.dismiss()
 
         }.create()
@@ -53,17 +64,24 @@ class SimpleDateDlgFragment : DialogFragment(), DatePickerDialog.OnDateSetListen
     }
 
     override fun onDateSet(p0: DatePicker?, year: Int, monthOfYear: Int, dayOfMonth: Int) {
-        timeMs = GregorianCalendar(year, monthOfYear, dayOfMonth).timeInMillis
+        ViewModelProviders.of(this).get(SimpleDateViewModel::class.java).timeMs = GregorianCalendar(year, monthOfYear, dayOfMonth).timeInMillis
         TimePickerDialog(context, this, 12, 30, android.text.format.DateFormat.is24HourFormat(context)).show()
 
     }
 
     override fun onTimeSet(p0: TimePicker?, h: Int, m: Int) {
-        timeMs += (m * 60 + h * 3600) * 1000
-        val d = Date(timeMs)
+        val viewModel = ViewModelProviders.of(this).get(SimpleDateViewModel::class.java)
+        var tMs = viewModel.timeMs
+        if (tMs == null)
+            tMs = 0
+
+        tMs += (m * 60 + h * 3600) * 1000
+        val d = Date(tMs)
         val date = android.text.format.DateFormat.getLongDateFormat(context).format(d)
         val time = android.text.format.DateFormat.getTimeFormat(context).format(d)
         setDateTxt.text = "$date  $time"
+
+        viewModel.timeMs=tMs
 
     }
 
